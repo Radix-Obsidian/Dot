@@ -1,0 +1,45 @@
+services:
+  dot-gateway:
+    image: ${DOT_IMAGE:-dot:local}
+    environment:
+      HOME: /home/node
+      TERM: xterm-256color
+      DOT_GATEWAY_TOKEN: ${DOT_GATEWAY_TOKEN}
+      CLAUDE_AI_SESSION_KEY: ${CLAUDE_AI_SESSION_KEY}
+      CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY}
+      CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE}
+    volumes:
+      - ${DOT_CONFIG_DIR}:/home/node/.dot
+      - ${DOT_WORKSPACE_DIR}:/home/node/.dot/workspace
+    ports:
+      - "${DOT_GATEWAY_PORT:-18789}:18789"
+      - "${DOT_BRIDGE_PORT:-18790}:18790"
+    init: true
+    restart: unless-stopped
+    command:
+      [
+        "node",
+        "dist/index.js",
+        "gateway",
+        "--bind",
+        "${DOT_GATEWAY_BIND:-lan}",
+        "--port",
+        "18789",
+      ]
+
+  dot-cli:
+    image: ${DOT_IMAGE:-dot:local}
+    environment:
+      HOME: /home/node
+      TERM: xterm-256color
+      BROWSER: echo
+      CLAUDE_AI_SESSION_KEY: ${CLAUDE_AI_SESSION_KEY}
+      CLAUDE_WEB_SESSION_KEY: ${CLAUDE_WEB_SESSION_KEY}
+      CLAUDE_WEB_COOKIE: ${CLAUDE_WEB_COOKIE}
+    volumes:
+      - ${DOT_CONFIG_DIR}:/home/node/.dot
+      - ${DOT_WORKSPACE_DIR}:/home/node/.dot/workspace
+    stdin_open: true
+    tty: true
+    init: true
+    entrypoint: ["node", "dist/index.js"]

@@ -1,0 +1,75 @@
+// OpenClaw Production Configuration Template
+// Copy to ~/.openclaw/openclaw.json and customize for your deployment
+// See https://docs.openclaw.ai/configuration for full reference
+{
+  // Agent configuration
+  agents: {
+    defaults: {
+      workspace: "~/.openclaw/workspace",
+      model: {
+        primary: "anthropic/claude-sonnet-4-5",
+        fallbacks: ["openai/gpt-4o"]
+      },
+      memorySearch: {
+        enabled: true,
+        provider: "openai",
+        model: "text-embedding-3-small"
+      }
+    },
+    list: [
+      { id: "main", default: true }
+    ]
+  },
+
+  // Web tools configuration (Perplexity + Firecrawl)
+  tools: {
+    web: {
+      search: {
+        enabled: true,
+        // Use Perplexity Sonar via OpenRouter for AI-synthesized answers
+        provider: "perplexity",
+        perplexity: {
+          // API key loaded from OPENROUTER_API_KEY env var
+          // Alternatively set apiKey here (not recommended for production)
+          baseUrl: "https://openrouter.ai/api/v1",
+          model: "perplexity/sonar-pro"
+        },
+        // Fallback settings (Brave used if Perplexity unavailable)
+        maxResults: 5,
+        timeoutSeconds: 30,
+        cacheTtlMinutes: 15
+      },
+      fetch: {
+        enabled: true,
+        maxChars: 50000,
+        timeoutSeconds: 30,
+        cacheTtlMinutes: 15,
+        maxRedirects: 3,
+        readability: true,
+        // Firecrawl for JS-heavy extraction
+        firecrawl: {
+          enabled: true,
+          // API key loaded from FIRECRAWL_API_KEY env var
+          baseUrl: "https://api.firecrawl.dev",
+          onlyMainContent: true,
+          maxAgeMs: 86400000, // 1 day cache
+          timeoutSeconds: 60
+        }
+      }
+    }
+  },
+
+  // Gateway configuration
+  gateway: {
+    mode: "local", // Use "cloud" for cloud deployments
+    bind: "auto",
+    verbose: false
+  },
+
+  // Channel bindings (configure as needed)
+  bindings: [
+    { agentId: "main", match: { channel: "discord" } },
+    { agentId: "main", match: { channel: "telegram" } },
+    { agentId: "main", match: { channel: "whatsapp" } }
+  ]
+}
